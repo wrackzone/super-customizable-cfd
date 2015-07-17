@@ -145,13 +145,21 @@ Ext.define('CustomApp', {
         var group_by_field = this.getSetting('group_by_field');
         var start_date = this.getSetting('start_date');
         var end_date = this.getSetting('end_date');
+        var featureProgressState = (this.getSetting('featureProgressState') === true || this.getSetting('featureProgressState') === 'true')
         
         var value_field = this.getSetting('metric_field');
+
+        if (featureProgressState) {
+            allowed_values = ["Not Started","In Progress","Done"];
+            value_field = "Count";
+            group_by_field = "FeatureProgressState";
+        }
+
         
         this.logger.log("Making chart for ", type_path, " on ", group_by_field);
         this.logger.log("  Start Date/End Date: ", start_date, end_date);
         this.logger.log("  Allowed Values: ", allowed_values);
-        
+
         var chart_title = this._getChartTitle(type_path,group_by_field);
         this.logger.log("  Title: ", chart_title);
         
@@ -174,7 +182,7 @@ Ext.define('CustomApp', {
                     {property:'_ProjectHierarchy', value: project}
                 ],
                 hydrate: [group_by_field],
-                fetch: [group_by_field,value_field]
+                fetch: [group_by_field,value_field,'ActualEndDate','ActualStartDate','FormattedID']
             },
             chartConfig: {
                  chart: {
@@ -233,6 +241,9 @@ Ext.define('CustomApp', {
                     }
                 }
                 if ( field.get('name') === 'State' ) { 
+                    return true;
+                }
+                if ( field.get('name') === 'InvestmentCategory' ) { 
                     return true;
                 }
                 return false;
@@ -401,7 +412,19 @@ Ext.define('CustomApp', {
             width: 250,
             margin: 10,
             fieldLabel:'Limit to items that currently meet this query:'
-        }];
+        },
+        {
+                name: 'featureProgressState',
+                xtype: 'rallycheckboxfield',
+                labelWidth : 200,
+                minWidth : 400,
+                labelAlign : 'left',
+                // boxLabelAlign: 'after',
+                fieldLabel: 'For PortfolioItem/Feature use Feature Story progress for state',
+                margin: 10
+                // boxLabel: 'For PortfolioItem/Feature use Feature progress for state'
+        }
+        ];
     },
     //showSettings:  Override to add showing when external + scrolling
     showSettings: function(options) {
