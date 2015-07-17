@@ -87,6 +87,25 @@ Ext.define("Rally.TechnicalServices.CFDCalculator", {
         if ( this.startDate ) { this.startDate = this.startDate.replace(/T.*$/,""); }
         if ( this.endDate ) { this.endDate = this.endDate.replace(/T.*$/,""); }
     },
+
+    getDerivedFieldsOnInput : function() {
+
+      return [
+        { 
+          "as": "FeatureProgressState", 
+          "f": function(snapshot) { 
+            // console.log ("Start:",snapshot.ActualStartDate,"End:",snapshot.ActualEndDate);
+            if (!_.isUndefined(snapshot.ActualStartDate) && !_.isNull(snapshot.ActualStartDate) && _.isUndefined(snapshot.ActualEndDate)) {
+              return "In Progress";
+            }
+            if (!_.isUndefined(snapshot.ActualEndDate) && !_.isNull(snapshot.ActualEndDate)) {
+              return "Done";
+            }
+            return "Not Started";
+          }
+        }
+      ];
+    },
     /*
      * How to measure
      * 
@@ -190,6 +209,9 @@ Ext.define("Rally.TechnicalServices.CFDCalculator", {
     },
     // override runCalculation to change false to "false" because highcharts doesn't like it
     runCalculation: function (snapshots) {
+
+      // console.log("snapshots",snapshots);
+      console.log(_.uniq(_.map(snapshots,function(s){return s.FormattedID})));
         
         var calculatorConfig = this._prepareCalculatorConfig(),
             seriesConfig = this._buildSeriesConfig(calculatorConfig);
