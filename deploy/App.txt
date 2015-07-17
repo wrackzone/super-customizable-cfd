@@ -3,11 +3,11 @@
 <head>
     <title>Super Customizable Cumulative Flow Diagram</title>
     <!--  (c) 2013,2014 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Jan 19 2015 10:40:11 GMT-0500 (EST) -->
+    <!--  Build Date: Fri Jul 17 2015 17:37:58 GMT-0400 (EDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Jan 19 2015 10:40:11 GMT-0500 (EST)";
-        var CHECKSUM = 39866905209;
+        var APP_BUILD_DATE = "Fri Jul 17 2015 17:37:58 GMT-0400 (EDT)";
+        var CHECKSUM = 43138085071;
     </script>
     
     <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
@@ -103,6 +103,25 @@ Ext.define("Rally.TechnicalServices.CFDCalculator", {
         
         if ( this.startDate ) { this.startDate = this.startDate.replace(/T.*$/,""); }
         if ( this.endDate ) { this.endDate = this.endDate.replace(/T.*$/,""); }
+    },
+
+    getDerivedFieldsOnInput : function() {
+
+      return [
+        { 
+          "as": "FeatureProgressState", 
+          "f": function(snapshot) { 
+            // console.log ("Start:",snapshot.ActualStartDate,"End:",snapshot.ActualEndDate);
+            if (!_.isUndefined(snapshot.ActualStartDate) && !_.isNull(snapshot.ActualStartDate) && _.isUndefined(snapshot.ActualEndDate)) {
+              return "In Progress";
+            }
+            if (!_.isUndefined(snapshot.ActualEndDate) && !_.isNull(snapshot.ActualEndDate)) {
+              return "Done";
+            }
+            return "Not Started";
+          }
+        }
+      ];
     },
     /*
      * How to measure
@@ -207,6 +226,9 @@ Ext.define("Rally.TechnicalServices.CFDCalculator", {
     },
     // override runCalculation to change false to "false" because highcharts doesn't like it
     runCalculation: function (snapshots) {
+
+      // console.log("snapshots",snapshots);
+      console.log(_.uniq(_.map(snapshots,function(s){return s.FormattedID})));
         
         var calculatorConfig = this._prepareCalculatorConfig(),
             seriesConfig = this._buildSeriesConfig(calculatorConfig);
@@ -242,6 +264,7 @@ Ext.define("Rally.TechnicalServices.CFDCalculator", {
         
         
 });
+
 /**
  * A link that pops up a version dialog box
  */
@@ -1026,13 +1049,21 @@ Ext.define('CustomApp', {
         var group_by_field = this.getSetting('group_by_field');
         var start_date = this.getSetting('start_date');
         var end_date = this.getSetting('end_date');
+        var featureProgressState = (this.getSetting('featureProgressState') === true || this.getSetting('featureProgressState') === 'true')
         
         var value_field = this.getSetting('metric_field');
+
+        if (featureProgressState) {
+            allowed_values = ["Not Started","In Progress","Done"];
+            value_field = "Count";
+            group_by_field = "FeatureProgressState";
+        }
+
         
         this.logger.log("Making chart for ", type_path, " on ", group_by_field);
         this.logger.log("  Start Date/End Date: ", start_date, end_date);
         this.logger.log("  Allowed Values: ", allowed_values);
-        
+
         var chart_title = this._getChartTitle(type_path,group_by_field);
         this.logger.log("  Title: ", chart_title);
         
@@ -1055,7 +1086,7 @@ Ext.define('CustomApp', {
                     {property:'_ProjectHierarchy', value: project}
                 ],
                 hydrate: [group_by_field],
-                fetch: [group_by_field,value_field]
+                fetch: [group_by_field,value_field,'ActualEndDate','ActualStartDate','FormattedID']
             },
             chartConfig: {
                  chart: {
@@ -1114,6 +1145,9 @@ Ext.define('CustomApp', {
                     }
                 }
                 if ( field.get('name') === 'State' ) { 
+                    return true;
+                }
+                if ( field.get('name') === 'InvestmentCategory' ) { 
                     return true;
                 }
                 return false;
@@ -1282,7 +1316,19 @@ Ext.define('CustomApp', {
             width: 250,
             margin: 10,
             fieldLabel:'Limit to items that currently meet this query:'
-        }];
+        },
+        {
+                name: 'featureProgressState',
+                xtype: 'rallycheckboxfield',
+                labelWidth : 200,
+                minWidth : 400,
+                labelAlign : 'left',
+                // boxLabelAlign: 'after',
+                fieldLabel: 'For PortfolioItem/Feature use Feature Story progress for state',
+                margin: 10
+                // boxLabel: 'For PortfolioItem/Feature use Feature progress for state'
+        }
+        ];
     },
     //showSettings:  Override to add showing when external + scrolling
     showSettings: function(options) {
