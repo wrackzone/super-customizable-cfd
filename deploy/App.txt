@@ -3,11 +3,11 @@
 <head>
     <title>Super Customizable Cumulative Flow Diagram</title>
     <!--  (c) 2013,2014 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Fri Jul 17 2015 17:37:58 GMT-0400 (EDT) -->
+    <!--  Build Date: Fri Jul 17 2015 17:40:10 GMT-0400 (EDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Fri Jul 17 2015 17:37:58 GMT-0400 (EDT)";
-        var CHECKSUM = 43138085071;
+        var APP_BUILD_DATE = "Fri Jul 17 2015 17:40:10 GMT-0400 (EDT)";
+        var CHECKSUM = 43138077175;
     </script>
     
     <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
@@ -1147,7 +1147,7 @@ Ext.define('CustomApp', {
                 if ( field.get('name') === 'State' ) { 
                     return true;
                 }
-                if ( field.get('name') === 'InvestmentCategory' ) { 
+                if ( field.get('name') === 'Investment Category' ) { 
                     return true;
                 }
                 return false;

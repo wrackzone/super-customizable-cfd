@@ -243,7 +243,7 @@ Ext.define('CustomApp', {
                 if ( field.get('name') === 'State' ) { 
                     return true;
                 }
-                if ( field.get('name') === 'InvestmentCategory' ) { 
+                if ( field.get('name') === 'Investment Category' ) { 
                     return true;
                 }
                 return false;
